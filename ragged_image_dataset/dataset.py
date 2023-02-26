@@ -1,11 +1,11 @@
 import torch
-import numpy as np
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from PIL import Image
 import PIL
 from glob import glob
 from os import path
+from tqdm import tqdm
 
 
 class RaggedImageDataset(Dataset):
@@ -80,7 +80,8 @@ class RaggedImageDataset(Dataset):
         """
         width, height = self.bucketed_widths[idx], self.bucketed_heights[idx]
         image_transforms = transforms.Compose([transforms.Resize((height, width,)), *self.post_resize_transforms])
-        return image_transforms(Image.open(self.image_files[idx])), self.image_files[idx]
+        im = image_transforms(Image.open(self.image_files[idx]))
+        return im, self.image_files[idx]
 
 
     def __len__(self):
@@ -133,11 +134,16 @@ def get_images_dimensions(image_files):
     """
     widths = torch.zeros(len(image_files), dtype=torch.int)
     heights = torch.zeros(len(image_files), dtype=torch.int)
-    for i, image_file in enumerate(image_files):
+    for i, image_file in tqdm(enumerate(image_files), desc="loading image dimensions", total=len(image_files)):
         try:
             with Image.open(image_file) as im:
                 width, height = im.size
+                mode = im.mode
         except PIL.UnidentifiedImageError:
+            widths[i] = 0
+            heights[i] = -1
+            continue
+        if mode!="RGB":
             widths[i] = 0
             heights[i] = -1
             continue
