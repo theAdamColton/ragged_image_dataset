@@ -1,5 +1,6 @@
 import unittest
 import matplotlib.pyplot as plt
+from os import path
 import torch
 
 torch.random.seed()
@@ -7,6 +8,7 @@ torch.random.seed()
 from ragged_image_dataset.dataset import RaggedImageDataset
 from ragged_image_dataset.dataset import clamp_by_max_res, clamp_by_min_res
 
+TESTIMAGE_DIR = path.join(path.dirname(__file__), "testimages/")
 
 class TestRaggedDataset(unittest.TestCase):
     def testClampRes(self):
@@ -42,3 +44,17 @@ class TestRaggedDataset(unittest.TestCase):
         self.assertLessEqual(_min, mHeights.min().item())
         self.assertLessEqual(_min, mWidths.min().item())
         self.assertTrue(torch.allclose(original_ars, new_ars, atol=0.2))
+
+    def testLoadImages(self):
+        bs = 4
+        max_res = 128
+        min_res = 64
+        ds = RaggedImageDataset(TESTIMAGE_DIR, batch_size=8, largest_side_res=max_res, smallest_side_res=min_res)
+        old_size = None
+        for i, (im, label) in enumerate(ds):
+            new_size = im.shape
+            print(label)
+            print(new_size)
+            if i % bs != 0:
+                self.assertEqual(old_size, new_size)
+            old_size = new_size

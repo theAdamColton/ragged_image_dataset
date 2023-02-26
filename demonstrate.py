@@ -6,9 +6,9 @@ import sys
 sys.path.append("..")
 from ragged_image_dataset.dataset import RaggedImageDataset
 
-bs = 512
+bs = 3
 ds = RaggedImageDataset(
-    "/home/figes/Desktop/ukr_images/", batch_size=bs, bucketing_metric=torch.median
+    "./tests/testimages/", batch_size=bs, bucketing_metric=torch.median
 )
 
 # plots cdf of aspect_ratios
@@ -36,3 +36,9 @@ plt.legend()
 plt.xlabel("resolution")
 plt.ylabel("percentile")
 plt.show()
+
+for im, label in ds:
+    print(label)
+    print(im.shape)
+    plt.imshow(im.movedim(0, -1))
+    plt.show()

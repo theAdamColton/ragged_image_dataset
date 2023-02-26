@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from torch.utils.data import Dataset
+import torchvision.transforms as transforms
 from PIL import Image
 import PIL
 from glob import glob
@@ -18,13 +19,15 @@ class RaggedImageDataset(Dataset):
         min_aspect_ratio=0.2,
         ext=".jpg",
         bucketing_metric=torch.median,
+        post_resize_transforms=[transforms.ToTensor(), transforms.Normalize(0,1)],
     ):
         """
         Returns tensor batches of equal shape, from underlying images with different aspect ratios.
 
-        see: https://github.com/pytorch/vision/blob/main/references/detection/group_by_aspect_ratio.py
-
         Does a first pass over all images in path/*ext, getting their dimensions and checking that they are not corrupt.
+
+        Then sorts the images by aspect ratio, and then groups together images into batches, assigning to them
+            widths and heights based on bucketing_metric
         """
 
         image_files = glob(path.join(image_path, f"**/*{ext}"), recursive=True)
@@ -69,15 +72,23 @@ class RaggedImageDataset(Dataset):
         self.bucketed_heights = height_buckets[bucketed_indeces]
         self.bucketed_aspect_ratios = self.bucketed_widths / self.bucketed_heights
 
+        self.post_resize_transforms = post_resize_transforms
+
     def __getitem__(self, idx):
         """
-        returns an image
+        returns image, filename
         """
+        width, height = self.bucketed_widths[idx], self.bucketed_heights[idx]
+        image_transforms = transforms.Compose([transforms.Resize((height, width,)), *self.post_resize_transforms])
+        return image_transforms(Image.open(self.image_files[idx])), self.image_files[idx]
 
-        # return self.
 
     def __len__(self):
         return len(self.image_files)
+
+    def __iter__(self):
+        for i in range(len(self)):
+            yield self.__getitem__(i)
 
 
 def clamp_by_max_res(widths, heights, largest_side_res):
