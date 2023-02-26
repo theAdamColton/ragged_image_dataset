@@ -27,7 +27,7 @@ class RandomBatchwiseSampler(Sampler):
             yield idxs
 
     def __len__(self) -> int:
-        return self._len
+        return self.n_batches
 
 class RaggedImageDataset(Dataset):
     def __init__(
