@@ -13,7 +13,7 @@ class RandomBatchwiseSampler(Sampler):
     Samples elements randomly, maintaining that elements are kept in the same
     relative batches. In other words, shuffles between batches.
 
-    use like: DataLoader(ragged_image_dataset, sampler=RandomBatchwiseSampler(ragged_image_dataset, ....))
+    use like: DataLoader(ragged_image_dataset, sampler=RandomBatchwiseSampler(len(ragged_image_dataset), batch_size))
     """
     def __init__(self, _len:int, batch_size: int):
         self.n_batches = _len // batch_size + 0 if _len % batch_size == 0 else 1
@@ -24,6 +24,9 @@ class RandomBatchwiseSampler(Sampler):
         for batch_i in torch.randperm(self.n_batches):
             for abs_i in range(batch_i * self.batch_size, batch_i * self.batch_size + self.batch_size):
                 yield abs_i
+
+    def __len__(self) -> int:
+        return self._len
 
 class RaggedImageDataset(Dataset):
     def __init__(
