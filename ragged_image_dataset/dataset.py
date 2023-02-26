@@ -1,5 +1,6 @@
+from typing import Iterator
 import torch
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, Sampler
 import torchvision.transforms as transforms
 from PIL import Image
 import PIL
@@ -7,6 +8,22 @@ from glob import glob
 from os import path
 from tqdm import tqdm
 
+class RandomBatchwiseSampler(Sampler):
+    """
+    Samples elements randomly, maintaining that elements are kept in the same
+    relative batches. In other words, shuffles between batches.
+
+    use like: DataLoader(ragged_image_dataset, sampler=RandomBatchwiseSampler(ragged_image_dataset, ....))
+    """
+    def __init__(self, _len:int, batch_size: int):
+        self.n_batches = _len // batch_size + 0 if _len % batch_size == 0 else 1
+        self._len = _len
+        self.batch_size = batch_size
+
+    def __iter__(self) -> Iterator[int]:
+        for batch_i in torch.randperm(self.n_batches):
+            for abs_i in range(batch_i * self.batch_size, batch_i * self.batch_size + self.batch_size):
+                yield abs_i
 
 class RaggedImageDataset(Dataset):
     def __init__(

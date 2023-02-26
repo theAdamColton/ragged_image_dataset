@@ -2,10 +2,11 @@ import unittest
 import matplotlib.pyplot as plt
 from os import path
 import torch
+from torch.utils.data import DataLoader
 
 torch.random.seed()
 
-from ragged_image_dataset.dataset import RaggedImageDataset
+from ragged_image_dataset.dataset import RaggedImageDataset, RandomBatchwiseSampler
 from ragged_image_dataset.dataset import clamp_by_max_res, clamp_by_min_res
 
 TESTIMAGE_DIR = path.join(path.dirname(__file__), "testimages/")
@@ -58,3 +59,14 @@ class TestRaggedDataset(unittest.TestCase):
             if i % bs != 0:
                 self.assertEqual(old_size, new_size)
             old_size = new_size
+
+    def testLoadImagesWithDataloader(self):
+        bs = 4
+        max_res = 128
+        min_res = 64
+        ds = RaggedImageDataset(TESTIMAGE_DIR, batch_size=8, largest_side_res=max_res, smallest_side_res=min_res)
+        dl = DataLoader(ds, sampler=RandomBatchwiseSampler(len(ds), bs), num_workers=8, batch_size=bs)
+        for b_i, (im_b, label_b) in enumerate(dl):
+            print("b: ", im_b.shape)
+            print("b: ", label_b)
+
