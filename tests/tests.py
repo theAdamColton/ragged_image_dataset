@@ -65,7 +65,7 @@ class TestRaggedDataset(unittest.TestCase):
         max_res = 128
         min_res = 64
         ds = RaggedImageDataset(TESTIMAGE_DIR, batch_size=8, largest_side_res=max_res, smallest_side_res=min_res)
-        dl = DataLoader(ds, sampler=RandomBatchwiseSampler(len(ds), bs), num_workers=8, batch_size=bs)
+        dl = DataLoader(ds, batch_sampler=RandomBatchwiseSampler(len(ds), bs), num_workers=2)
         for b_i, (im_b, label_b) in enumerate(dl):
             print("b: ", im_b.shape)
             print("b: ", label_b)
