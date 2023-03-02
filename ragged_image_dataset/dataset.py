@@ -70,8 +70,8 @@ class RaggedImageDataset(Dataset):
         aspect_ratios_indeces = aspect_ratios_indeces[_mask]
         widths = widths[aspect_ratios_indeces]
         heights = heights[aspect_ratios_indeces]
-        widths, heights = clamp_by_max_res(widths, heights, largest_side_res)
         widths, heights = clamp_by_min_res(widths, heights, smallest_side_res)
+        widths, heights = clamp_by_max_res(widths, heights, largest_side_res)
         self.aspect_ratios = widths / heights
         self.widths = widths
         self.heights = heights

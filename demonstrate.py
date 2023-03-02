@@ -8,7 +8,7 @@ from ragged_image_dataset.dataset import RaggedImageDataset
 
 bs = 3
 ds = RaggedImageDataset(
-    "./tests/testimages/", batch_size=bs, bucketing_metric=torch.median
+    "./tests/testimages/", batch_size=bs, bucketing_metric=torch.median, largest_side_res=256
 )
 
 # plots cdf of aspect_ratios

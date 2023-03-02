@@ -70,3 +70,11 @@ class TestRaggedDataset(unittest.TestCase):
             print("b: ", im_b.shape)
             print("b: ", label_b)
 
+    def testMaxRes(self):
+        bs=4
+        for max_res in [128, 512, 1028]:
+            ds = RaggedImageDataset(TESTIMAGE_DIR, batch_size=bs, largest_side_res=max_res)
+            for image, label in ds:
+                print("Shape", image.shape)
+                self.assertLessEqual(max(image.shape[1:]), max_res)
+
