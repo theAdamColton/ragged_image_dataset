@@ -12,18 +12,18 @@ ds = RaggedImageDataset(
 )
 
 # plots cdf of aspect_ratios
-nnth = torch.quantile(ds.aspect_ratios, 0.99)
-mask = ds.aspect_ratios < nnth
-ar = ds.aspect_ratios[mask]
-bar = ds.bucketed_aspect_ratios[mask]
-plt.plot(ar, [i / len(ds.aspect_ratios) for i in range(len(ar))])
+#nnth = torch.quantile(ds.aspect_ratios, 0.99)
+#mask = ds.aspect_ratios < nnth
+plt.plot(ds.aspect_ratios, [i / len(ds.aspect_ratios) for i in range(len(ds.aspect_ratios))], label="Original aspect ratios")
 plt.plot(
-    bar,
-    [i / len(ds.aspect_ratios) for i in range(len(bar))],
+    ds.bucketed_aspect_ratios,
+    [i / len(ds.aspect_ratios) for i in range(len(ds.bucketed_aspect_ratios))],
     label="bucketed aspect ratios",
 )
 plt.xlabel("aspect ratio")
 plt.ylabel("percentile")
+plt.title("CDF of Original Vs. Bucketed Aspect Ratios")
+plt.legend()
 plt.show()
 
 # plots cdf of heights and bucketed heights
